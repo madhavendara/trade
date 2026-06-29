@@ -19,7 +19,7 @@ import images from "@/app/assets";
 
 // ── CVA ──────────────────────────────────────────────────────
 
-const shell          = cva("flex h-screen flex-col overflow-hidden bg-[#161617]");
+const shell          = cva("flex h-[100dvh] flex-col overflow-hidden bg-[#161617]");
 const topbar         = cva("flex flex-wrap min-[800px]:flex-nowrap w-full shrink-0 items-center border-b border-[#2e2e2f] bg-[#1c1c1d] px-6");
 const logoWrap       = cva("flex h-[76px] w-[180px] shrink-0 items-center");
 const logoImg        = cva("h-[34px] w-auto object-contain");
