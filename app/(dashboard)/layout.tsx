@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cva } from "class-variance-authority";
@@ -9,7 +10,10 @@ import { Button } from "@/components/ui/button";
 import { SidebarNav, BottomTabBar } from "@/components/sidebar-nav";
 import { TickerStreamProvider } from "@/components/ticker-stream-provider";
 import { KlineStreamProvider } from "@/components/kline-stream-provider";
+import { NotificationWatcher } from "@/components/notification-watcher";
+import { NotificationDropdown } from "@/components/notification-dropdown";
 import { useDashboardStore } from "@/lib/store";
+import { useNotificationStore, selectUnreadCount } from "@/lib/notification-store";
 import { SYMBOLS } from "@/lib/binance";
 import images from "@/app/assets";
 
@@ -36,8 +40,18 @@ const body           = cva("flex flex-1 overflow-hidden");
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const [notifCount] = useState(2);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const queryClient = useQueryClient();
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await queryClient.refetchQueries();
+    setRefreshing(false);
+  }, [queryClient]);
   const searchRef = useRef<HTMLDivElement>(null);
+  const notifWrapRef = useRef<HTMLDivElement>(null);
+  const unreadCount = useNotificationStore(selectUnreadCount);
 
   const pathname = usePathname();
   const { setSelectedSymbol, mobileFilterOpen, setMobileFilterOpen } = useDashboardStore();
@@ -60,6 +74,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     document.addEventListener("mousedown", handle);
     return () => document.removeEventListener("mousedown", handle);
   }, []);
+
+  useEffect(() => {
+    if (!notifOpen) return;
+    function handle(e: MouseEvent) {
+      if (notifWrapRef.current && !notifWrapRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [notifOpen]);
 
   function selectSymbol(symbol: string) {
     setSelectedSymbol(symbol);
@@ -101,14 +126,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className={topbarIcons()}>
           <div className={topbarDivider()} />
 
-          <Button variant="ghost" size="icon" className={iconBtn()}>
-            <RefreshCw className="h-5 w-5" />
+          <Button
+            variant="ghost"
+            size="icon"
+            className={iconBtn()}
+            disabled={refreshing}
+            onClick={handleRefresh}
+          >
+            <RefreshCw className={`h-5 w-5 transition-transform${refreshing ? " animate-spin" : ""}`} />
           </Button>
 
-          <Button variant="ghost" size="icon" className={`relative ${iconBtn()}`}>
-            <Bell className="h-5 w-5" />
-            {notifCount > 0 && <span className={notifBadge()}>{notifCount}</span>}
-          </Button>
+          <div ref={notifWrapRef} className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`relative ${iconBtn()}`}
+              onClick={() => setNotifOpen((o) => !o)}
+            >
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className={notifBadge()}>
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </Button>
+            {notifOpen && <NotificationDropdown onClose={() => setNotifOpen(false)} />}
+          </div>
 
           {hasFilter && (
             <Button
@@ -126,6 +169,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className={body()}>
         <TickerStreamProvider />
         <KlineStreamProvider />
+        <NotificationWatcher />
         <SidebarNav />
         {children}
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { cva } from "class-variance-authority";
-import { Plus, Check, TrendingUp, TrendingDown } from "lucide-react";
+import { Plus, Star, TrendingUp, TrendingDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useTopMovers } from "@/hooks/use-top-movers";
@@ -105,7 +105,7 @@ function MoverList({ items, isLoading, positive, watchlist, onWatch, onSelect }:
               onClick={(e) => { e.stopPropagation(); onWatch(t.symbol); }}
             >
               {inList
-                ? <Check className="h-3.5 w-3.5 text-violet-400" />
+                ? <Star className="h-3.5 w-3.5 fill-violet-400 text-violet-400" />
                 : <Plus className="h-3.5 w-3.5" />}
             </Button>
           </div>
