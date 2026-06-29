@@ -7,7 +7,7 @@ import { OrderBook } from "./order-book";
 
 // ── CVA ──────────────────────────────────────────────────────
 
-const panelRow = cva("flex gap-4 h-full");
+const panelRow = cva("flex h-full flex-col gap-4 min-[1200px]:flex-row");
 
 // ─────────────────────────────────────────────────────────────
 
