@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -50,7 +51,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setRefreshing(false);
   }, [queryClient]);
   const searchRef = useRef<HTMLDivElement>(null);
-  const notifWrapRef = useRef<HTMLDivElement>(null);
   const unreadCount = useNotificationStore(selectUnreadCount);
 
   const pathname = usePathname();
@@ -74,17 +74,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     document.addEventListener("mousedown", handle);
     return () => document.removeEventListener("mousedown", handle);
   }, []);
-
-  useEffect(() => {
-    if (!notifOpen) return;
-    function handle(e: MouseEvent) {
-      if (notifWrapRef.current && !notifWrapRef.current.contains(e.target as Node)) {
-        setNotifOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handle);
-    return () => document.removeEventListener("mousedown", handle);
-  }, [notifOpen]);
 
   function selectSymbol(symbol: string) {
     setSelectedSymbol(symbol);
@@ -136,22 +125,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <RefreshCw className={`h-5 w-5 transition-transform${refreshing ? " animate-spin" : ""}`} />
           </Button>
 
-          <div ref={notifWrapRef} className="relative">
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`relative ${iconBtn()}`}
-              onClick={() => setNotifOpen((o) => !o)}
-            >
-              <Bell className="h-5 w-5" />
-              {unreadCount > 0 && (
-                <span className={notifBadge()}>
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
-            </Button>
-            {notifOpen && <NotificationDropdown onClose={() => setNotifOpen(false)} />}
-          </div>
+          <Popover open={notifOpen} onOpenChange={setNotifOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`relative ${iconBtn()}`}
+              >
+                <Bell className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className={notifBadge()}>
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" sideOffset={8} className="p-0">
+              <NotificationDropdown onClose={() => setNotifOpen(false)} />
+            </PopoverContent>
+          </Popover>
 
           {hasFilter && (
             <Button
