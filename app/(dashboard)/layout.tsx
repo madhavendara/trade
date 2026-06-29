@@ -140,7 +140,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" sideOffset={8} className="p-0">
+            <PopoverContent align="end" sideOffset={8} className="w-[360px] max-w-[calc(100vw-1rem)] p-0">
               <NotificationDropdown onClose={() => setNotifOpen(false)} />
             </PopoverContent>
           </Popover>

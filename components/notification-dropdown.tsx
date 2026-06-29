@@ -9,7 +9,7 @@ import type { Notification, NotifCategory } from "@/lib/notification-store";
 
 // ── CVA ──────────────────────────────────────────────────────
 
-const panel      = cva("w-[360px]");
+const panel      = cva("w-full");
 const hdr        = cva("flex items-center justify-between border-b border-[#2e2e2f] px-4 py-3");
 const hdrTitle   = cva("text-[14px] font-semibold text-white");
 const hdrActions = cva("flex items-center gap-3");
